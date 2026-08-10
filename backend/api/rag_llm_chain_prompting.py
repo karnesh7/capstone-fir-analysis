@@ -26,9 +26,9 @@ from langchain_core.prompts import PromptTemplate
 from intent_queries import intent_to_retrieval_queries
 from model_config import get_fallback_chain
 
-load_dotenv()
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
+load_dotenv()
 
 NEGATIVE_RULE_THRESHOLD = 0.75
 

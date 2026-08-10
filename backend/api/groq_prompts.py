@@ -9,11 +9,14 @@ stateless — they receive the data they need and return structured dicts.
 import json
 import os
 import re
+from pathlib import Path
 
 from groq import Groq
 from dotenv import load_dotenv
 from model_config import groq_chat_with_fallback
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
 load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")

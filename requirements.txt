@@ -1,0 +1,29 @@
+# Core Backend & Server
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+websockets>=12.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+pymongo>=4.6.0
+requests>=2.31.0
+
+# Vector Search & RAG
+pinecone>=3.0.0
+sentence-transformers>=2.3.0
+numpy>=1.24.0
+torch>=2.0.0
+
+# LangChain & Groq
+groq>=0.9.0
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-groq>=0.1.0
+
+# PDF Processing & FIR Generation
+fpdf2>=2.7.0
+PyPDF2>=3.0.0
+
+# Optional OCR & Image processing
+Pillow>=10.0.0
+pytesseract>=0.3.10
+pdf2image>=1.17.0

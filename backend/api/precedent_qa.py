@@ -8,11 +8,14 @@ Uses Groq LLM to synthesize answers from retrieved QA pairs.
 from __future__ import annotations
 import json
 import os
+from pathlib import Path
 import textwrap
 from groq import Groq
 from dotenv import load_dotenv
 from model_config import groq_chat_with_fallback
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
 load_dotenv()
 
 

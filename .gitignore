@@ -50,6 +50,7 @@ ENV/
 *~
 .DS_Store
 *.txt
+!requirements.txt
 
 # Logs
 logs/*.jsonl

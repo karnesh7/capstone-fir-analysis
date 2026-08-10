@@ -27,6 +27,7 @@ import re
 import time
 
 from collections import Counter
+from pathlib import Path
 
 import json
 
@@ -56,6 +57,8 @@ from groq_prompts import (
 
 
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
 load_dotenv()
 
 
