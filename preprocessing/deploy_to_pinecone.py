@@ -13,7 +13,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-OUTPUT_DIR = Path("output")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = REPO_ROOT / "output"
+load_dotenv(REPO_ROOT / ".env")
 
 def deploy_to_pinecone():
     """Deploy all embeddings to Pinecone vector database"""

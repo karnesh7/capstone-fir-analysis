@@ -1,8 +1,8 @@
 {
   "status": "success",
-  "timestamp": "2026-01-11T14:38:54.073480",
+  "timestamp": "2026-08-10T20:45:32.491759",
   "index_name": "statute-embeddings",
-  "vectors_uploaded": 629,
+  "vectors_uploaded": 827,
   "embedding_model": "all-MiniLM-L6-v2",
   "embedding_dimension": 384,
   "similarity_metric": "cosine",
