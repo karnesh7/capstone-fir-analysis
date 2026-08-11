@@ -16,7 +16,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -246,25 +246,7 @@ async def generate_fir_pdf(req: FIRPdfRequest):
     )
 
 
-@app.post("/api/fir/upload")
-async def upload_fir_image(file: UploadFile = File(...)):
-    from ocr_to_fir import process_path_to_fir
 
-    tmp_dir = REPO_ROOT / "output" / "uploads"
-    tmp_dir.mkdir(parents=True, exist_ok=True)
-    tmp_path = tmp_dir / f"{uuid.uuid4().hex}_{file.filename}"
-
-    content = await file.read()
-    with open(tmp_path, "wb") as f:
-        f.write(content)
-
-    try:
-        return {"status": "ok", "fir": process_path_to_fir(tmp_path)}
-    except Exception as e:
-        raise HTTPException(status_code=422, detail=f"OCR failed: {e}")
-    finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
 
 
 # ---------------------------------------------------------------------------
