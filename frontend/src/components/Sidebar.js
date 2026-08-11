@@ -120,6 +120,26 @@ export default function Sidebar({
               <button className="logout-btn" onClick={onLogout}>Logout</button>
             </div>
           </div>
+
+          {/* Indian Kanoon Data Attribution */}
+          <div className="sidebar-attribution">
+            <a
+              href="https://indiankanoon.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Legal precedent search powered by Indian Kanoon"
+              className="kanoon-attribution-link"
+            >
+              <picture>
+                <source media="(max-width: 768px)" srcSet={`${process.env.PUBLIC_URL}/ikanoon_mobile_powered_transparent.png`} />
+                <img
+                  src={`${process.env.PUBLIC_URL}/ikanoon6_powered_transparent.png`}
+                  alt="Powered by Indian Kanoon"
+                  className="kanoon-badge-img"
+                />
+              </picture>
+            </a>
+          </div>
         </div>
       )}
     </aside>

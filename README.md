@@ -441,3 +441,10 @@ This is expected if:
 | `frontend/src/App.js` | Root app component, export brief handler & auth routing |
 | `frontend/src/data/presetScenarios.js` | 1-Click realistic scenario cases for testing |
 | `preprocessing/build_statute_dataset.py` | One-time statute dataset extraction & Pinecone vector build |
+
+---
+
+## Data Attribution & Acknowledgments
+
+- **Indian Kanoon**: Court precedent judgments, case laws, and legal ruling extracts are retrieved via the [Indian Kanoon API](https://api.indiankanoon.org/).
+- **Statute Data**: Bare acts for the Indian Penal Code (IPC) and Bharatiya Nyaya Sanhita (BNS, 2023) sourced from official Gazette publications.

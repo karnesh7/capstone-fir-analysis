@@ -334,6 +334,33 @@
   text-decoration: underline;
 }
 
+.sidebar-attribution {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kanoon-attribution-link {
+  display: inline-block;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.kanoon-attribution-link:hover {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.kanoon-badge-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 36px;
+  display: block;
+}
+
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
