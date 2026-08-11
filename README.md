@@ -1,6 +1,6 @@
 # LexIR
 
-LexIR is a legal intelligence and retrieval system for FIR analysis. It takes FIR text or scanned FIR images, maps allegations to applicable IPC/BNS sections, searches Indian Kanoon for precedent cases, summarizes the retrieved judgments, predicts the likely verdict, and supports follow-up legal questions in a chat-style interface.
+LexIR is a legal intelligence and retrieval system for FIR analysis. It takes FIR details and allegations, maps them to applicable IPC/BNS sections, searches Indian Kanoon for precedent cases, summarizes the retrieved judgments, predicts the likely verdict, and supports follow-up legal questions in a chat-style interface.
 
 The project is split into a Python backend and a React frontend:
 
@@ -12,7 +12,7 @@ The project is split into a Python backend and a React frontend:
 LexIR runs in three stages:
 
 1. Stage 1, FIR analysis
-   - Reads the FIR text or OCR output
+   - Reads the structured FIR incident facts
    - Identifies likely criminal intent and applicable IPC/BNS sections
    - Uses the RAG pipeline and statute retrieval to narrow down relevant legal provisions
 
@@ -29,7 +29,6 @@ LexIR runs in three stages:
 There is also support for:
 
 - FIR PDF generation
-- OCR-based FIR upload
 - Persistent chat/session history in MongoDB
 
 ## Repository Layout
@@ -45,7 +44,6 @@ backend/
     groq_prompts.py
     fir_pdf_generator.py
     fir_pdf_mapper.py
-    ocr_to_fir.py
 frontend/
   src/
     components/
@@ -92,8 +90,6 @@ PINECONE_API_KEY=your_pinecone_api_key
 # Optional (for Google Sign-In)
 REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
 ```
-
-If you use OCR locally, you may also need the extra packages listed at the bottom of `requirements.txt`.
 
 ## Installation
 
@@ -322,7 +318,7 @@ If the input is a civil / contract dispute, stage 2 is intentionally skipped and
 
 The project currently supports:
 
-- FIR analysis from text and OCR
+- Structured FIR analysis and legal reasoning
 - Statute mapping and stage-based reasoning
 - Civil / contract dispute detection with zero criminal sections when appropriate
 - Indian Kanoon precedent retrieval
