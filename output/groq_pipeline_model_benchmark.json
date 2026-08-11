@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-03-01T05:50:13.029186+00:00",
+  "timestamp_utc": "2026-08-11T17:44:52.096773+00:00",
   "cases": [
     {
       "case_id": "c1_armed_robbery",
@@ -53,93 +53,51 @@
     }
   ],
   "models_evaluated": [
-    "moonshotai/kimi-k2-instruct",
-    "meta-llama/llama-4-maverick-17b-128e-instruct",
     "llama-3.3-70b-versatile",
-    "moonshotai/kimi-k2-instruct-0905",
     "groq/compound-mini",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
-    "groq/compound",
     "llama-3.1-8b-instant",
+    "groq/compound",
     "allam-2-7b",
-    "qwen/qwen3-32b",
+    "qwen/qwen3.6-27b",
     "openai/gpt-oss-20b",
-    "openai/gpt-oss-120b",
-    "canopylabs/orpheus-arabic-saudi",
-    "canopylabs/orpheus-v1-english"
+    "openai/gpt-oss-120b"
   ],
   "ranking": [
-    {
-      "model": "moonshotai/kimi-k2-instruct",
-      "tier": "LLM",
-      "intent_accuracy": 1.0,
-      "reasoning_section_f1": 0.6833333333333333,
-      "json_parse_rate": 1.0,
-      "avg_latency_sec": 0.3859799799975008,
-      "composite_score": 0.8575
-    },
-    {
-      "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
-      "tier": "SLM",
-      "intent_accuracy": 1.0,
-      "reasoning_section_f1": 0.6511111111111111,
-      "json_parse_rate": 1.0,
-      "avg_latency_sec": 0.17233508001081646,
-      "composite_score": 0.843
-    },
     {
       "model": "llama-3.3-70b-versatile",
       "tier": "LLM",
       "intent_accuracy": 0.8,
       "reasoning_section_f1": 0.7980952380952381,
-      "json_parse_rate": 0.9,
-      "avg_latency_sec": 0.13786857002414762,
-      "composite_score": 0.8091428571428572
-    },
-    {
-      "model": "moonshotai/kimi-k2-instruct-0905",
-      "tier": "LLM",
-      "intent_accuracy": 1.0,
-      "reasoning_section_f1": 0.5678210678210678,
       "json_parse_rate": 1.0,
-      "avg_latency_sec": 0.4038051400100812,
-      "composite_score": 0.8055194805194805
+      "avg_latency_sec": 0.3119406899993919,
+      "composite_score": 0.8191428571428572
     },
     {
       "model": "groq/compound-mini",
       "tier": "SLM",
-      "intent_accuracy": 1.0,
-      "reasoning_section_f1": 0.4766666666666667,
-      "json_parse_rate": 1.0,
-      "avg_latency_sec": 1.791516529978253,
-      "composite_score": 0.7645000000000001
-    },
-    {
-      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
-      "tier": "SLM",
       "intent_accuracy": 0.8,
-      "reasoning_section_f1": 0.6314285714285715,
+      "reasoning_section_f1": 0.37761904761904763,
       "json_parse_rate": 0.9,
-      "avg_latency_sec": 0.145046059996821,
-      "composite_score": 0.7341428571428571
-    },
-    {
-      "model": "groq/compound",
-      "tier": "LLM",
-      "intent_accuracy": 0.6,
-      "reasoning_section_f1": 0.65,
-      "json_parse_rate": 0.8,
-      "avg_latency_sec": 3.527971119992435,
-      "composite_score": 0.6425000000000001
+      "avg_latency_sec": 2.2547470777774126,
+      "composite_score": 0.6199285714285715
     },
     {
       "model": "llama-3.1-8b-instant",
       "tier": "SLM",
       "intent_accuracy": 0.6,
-      "reasoning_section_f1": 0.4244444444444444,
-      "json_parse_rate": 1.0,
-      "avg_latency_sec": 0.13073537005111574,
-      "composite_score": 0.5609999999999999
+      "reasoning_section_f1": 0.46444444444444444,
+      "json_parse_rate": 0.9,
+      "avg_latency_sec": 0.29932143000078215,
+      "composite_score": 0.569
+    },
+    {
+      "model": "groq/compound",
+      "tier": "LLM",
+      "intent_accuracy": 0.6,
+      "reasoning_section_f1": 0.3333333333333333,
+      "json_parse_rate": 0.7,
+      "avg_latency_sec": 5.555555028572209,
+      "composite_score": 0.49000000000000005
     },
     {
       "model": "allam-2-7b",
@@ -147,17 +105,17 @@
       "intent_accuracy": 0.6,
       "reasoning_section_f1": 0.21161616161616162,
       "json_parse_rate": 1.0,
-      "avg_latency_sec": 0.12339962001424283,
+      "avg_latency_sec": 0.2080272800001694,
       "composite_score": 0.4652272727272727
     },
     {
-      "model": "qwen/qwen3-32b",
+      "model": "qwen/qwen3.6-27b",
       "tier": "LLM",
       "intent_accuracy": 0.0,
-      "reasoning_section_f1": 0.3188888888888889,
+      "reasoning_section_f1": 0.3333333333333333,
       "json_parse_rate": 0.0,
-      "avg_latency_sec": 0.3927356399828568,
-      "composite_score": 0.14350000000000002
+      "avg_latency_sec": 0.5566151899998658,
+      "composite_score": 0.15
     },
     {
       "model": "openai/gpt-oss-20b",
@@ -165,54 +123,36 @@
       "intent_accuracy": 0.2,
       "reasoning_section_f1": 0.0,
       "json_parse_rate": 0.2,
-      "avg_latency_sec": 0.2428371199639514,
+      "avg_latency_sec": 0.7711281500003679,
       "composite_score": 0.11000000000000001
     },
     {
       "model": "openai/gpt-oss-120b",
       "tier": "LLM",
-      "intent_accuracy": 0.2,
-      "reasoning_section_f1": 0.0,
-      "json_parse_rate": 0.1,
-      "avg_latency_sec": 0.7536014299839735,
-      "composite_score": 0.1
-    },
-    {
-      "model": "canopylabs/orpheus-arabic-saudi",
-      "tier": "LLM",
       "intent_accuracy": 0.0,
       "reasoning_section_f1": 0.0,
       "json_parse_rate": 0.0,
-      "avg_latency_sec": 999.0,
-      "composite_score": 0.0
-    },
-    {
-      "model": "canopylabs/orpheus-v1-english",
-      "tier": "LLM",
-      "intent_accuracy": 0.0,
-      "reasoning_section_f1": 0.0,
-      "json_parse_rate": 0.0,
-      "avg_latency_sec": 999.0,
+      "avg_latency_sec": 1.43398302000096,
       "composite_score": 0.0
     }
   ],
   "best_slm": {
-    "model": "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "model": "groq/compound-mini",
     "tier": "SLM",
-    "intent_accuracy": 1.0,
-    "reasoning_section_f1": 0.6511111111111111,
-    "json_parse_rate": 1.0,
-    "avg_latency_sec": 0.17233508001081646,
-    "composite_score": 0.843
+    "intent_accuracy": 0.8,
+    "reasoning_section_f1": 0.37761904761904763,
+    "json_parse_rate": 0.9,
+    "avg_latency_sec": 2.2547470777774126,
+    "composite_score": 0.6199285714285715
   },
   "best_llm": {
-    "model": "moonshotai/kimi-k2-instruct",
+    "model": "llama-3.3-70b-versatile",
     "tier": "LLM",
-    "intent_accuracy": 1.0,
-    "reasoning_section_f1": 0.6833333333333333,
+    "intent_accuracy": 0.8,
+    "reasoning_section_f1": 0.7980952380952381,
     "json_parse_rate": 1.0,
-    "avg_latency_sec": 0.3859799799975008,
-    "composite_score": 0.8575
+    "avg_latency_sec": 0.3119406899993919,
+    "composite_score": 0.8191428571428572
   },
   "metric_definitions": {
     "intent_accuracy": "correct_primary_intent_predictions / total_cases",
