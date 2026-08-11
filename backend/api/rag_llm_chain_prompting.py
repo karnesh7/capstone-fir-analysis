@@ -101,11 +101,13 @@ class StatuteRAGChainSystem:
             model=self._intent_models[0],
             temperature=0.3,
             api_key=self._groq_key,
+            request_timeout=60,
         )
         self.llm_reasoning = ChatGroq(
             model=self._reasoning_models[0],
             temperature=0.4,
             api_key=self._groq_key,
+            request_timeout=60,
         )
         print(f"✓ Groq LLMs initialized (intent: {self._intent_models[0]}, reasoning: {self._reasoning_models[0]})")
         print(f"  Fallback intent models:    {self._intent_models[1:]}")
@@ -330,33 +332,30 @@ Return ONLY valid JSON (no markdown, no code blocks):
     # ------------------------------------------------------------------
     #  LLM invoke with fallback
     # ------------------------------------------------------------------
-    _RETRYABLE_KEYWORDS = ("rate_limit", "capacity", "overloaded", "tokens per", "429", "503", "529")
-
     def _invoke_with_fallback(self, role: str, prompt_template: PromptTemplate,
                               inputs: dict) -> str:
-        """Invoke an LLM with automatic fallback on rate-limit / capacity errors."""
+        """Invoke an LLM with automatic fallback on any API/rate-limit error."""
         models = self._intent_models if role == "intent" else self._reasoning_models
         temp = 0.3 if role == "intent" else 0.4
         formatted = prompt_template.format(**inputs)
         last_exc: Exception | None = None
 
         for model_name in models:
-            llm = ChatGroq(model=model_name, temperature=temp, api_key=self._groq_key)
+            llm = ChatGroq(model=model_name, temperature=temp, api_key=self._groq_key, request_timeout=60)
             for attempt in range(2):  # 1 initial + 1 retry
                 try:
                     return llm.invoke(formatted).content
                 except Exception as e:
+                    last_exc = e
                     msg = str(e).lower()
-                    if any(kw in msg for kw in self._RETRYABLE_KEYWORDS):
-                        last_exc = e
-                        if attempt == 0:
-                            wait = 2
-                            print(f"[Fallback] {model_name} error ({type(e).__name__}), retry in {wait}s...")
-                            time.sleep(wait)
-                        else:
-                            print(f"[Fallback] {model_name} failed twice, trying next model...")
+                    print(f"[Fallback] {role} model '{model_name}' attempt {attempt+1} failed: {e}")
+                    if attempt == 0 and any(kw in msg for kw in ("rate_limit", "429", "capacity", "overloaded")):
+                        wait = 2
+                        print(f"[Fallback] Retrying '{model_name}' in {wait}s...")
+                        time.sleep(wait)
                     else:
-                        raise
+                        print(f"[Fallback] Skipping '{model_name}', trying next fallback model...")
+                        break
 
         raise last_exc or RuntimeError(f"All {role} fallback models failed")
 
@@ -368,12 +367,12 @@ Return ONLY valid JSON (no markdown, no code blocks):
         print("STATUTE-AWARE RAG WITH LANGCHAIN CHAIN PROMPTING")
         print("=" * 80)
 
-        async def _notify(thought: str):
+        def _notify(thought: str):
             if callback:
-                if asyncio.iscoroutinefunction(callback):
-                    await callback(thought)
-                else:
+                try:
                     callback(thought)
+                except Exception as cb_err:
+                    print(f"[Callback Warning] {cb_err}")
 
         case_facts = {
             "incident": fir_data.get("incident_description", ""),
@@ -382,18 +381,18 @@ Return ONLY valid JSON (no markdown, no code blocks):
         }
 
         # Step 0  — initial vector retrieval
-        if callback: asyncio.run(_notify("Retrieving initial statute candidates from Pinecone vector database..."))
+        _notify("Retrieving initial statute candidates from Pinecone vector database...")
         query_text = f"{case_facts['incident']} {case_facts['victim_impact']}"
         retrieved_chunks = self.retrieve_relevant_statutes(query_text, top_k=20)
         print(f"✓ Retrieved {len(retrieved_chunks)} statute chunks")
 
         # Step 1  — negative-rules filter
-        if callback: asyncio.run(_notify("Applying negative rule semantic filtering to exclude irrelevant sections..."))
+        _notify("Applying negative rule semantic filtering to exclude irrelevant sections...")
         filtered_chunks = self.apply_negative_rules_filter(retrieved_chunks, case_facts)
         print(f"✓ Filtered to {len(filtered_chunks)} applicable chunks")
 
         # Step 2  — Chain 1: intent identification
-        if callback: asyncio.run(_notify("Analyzing case facts to identify primary criminal intent using LLM..."))
+        _notify("Analyzing case facts to identify primary criminal intent using LLM...")
         intent_input = {
             "complainant": fir_data.get("complainant_name", "Unknown"),
             "accused": ", ".join(fir_data.get("accused_names", [])),
@@ -410,7 +409,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
         print(f"✓ Primary Intent: {intent_result.get('primary_intent')}")
 
         # Step 3  — intent-driven second retrieval pass
-        if callback: asyncio.run(_notify(f"Performing targeted retrieval for intent: {intent_result.get('primary_intent')}..."))
+        _notify(f"Performing targeted retrieval for intent: {intent_result.get('primary_intent')}...")
         for iq in intent_to_retrieval_queries(
             intent_result.get("primary_intent", ""),
             intent_result.get("secondary_intents", []),
@@ -421,7 +420,7 @@ Return ONLY valid JSON (no markdown, no code blocks):
         print(f"✓ After intent-driven retrieval: {len(filtered_chunks)} unique chunks")
 
         # Step 4  — Chain 2: legal reasoning
-        if callback: asyncio.run(_notify("Synthesizing legal reasoning and mapping applicable IPC/BNS sections..."))
+        _notify("Synthesizing legal reasoning and mapping applicable IPC/BNS sections...")
         statute_ctx = "\n".join(
             f"[{c['law']} {c['section_id']}] {c['section_text']}" for c in filtered_chunks[:20]
         )

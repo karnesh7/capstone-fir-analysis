@@ -149,9 +149,14 @@ async def _run_rag_analysis(fir_data, deps: ServerDeps, thought_callback: Callab
     """Run the full RAG chain analysis in a thread."""
     system = deps.ensure_rag_system()
     loop = asyncio.get_event_loop()
+
+    def _sync_callback(t):
+        if thought_callback:
+            asyncio.run_coroutine_threadsafe(thought_callback(t), loop)
+
     return await loop.run_in_executor(
         None,
-        lambda: system.analyze_fir_with_chains(fir_data, callback=thought_callback)
+        lambda: system.analyze_fir_with_chains(fir_data, callback=_sync_callback)
     )
 
 
