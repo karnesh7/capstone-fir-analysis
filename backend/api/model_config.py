@@ -17,38 +17,59 @@ def _benchmark_file() -> Path:
 
 
 # ---------------------------------------------------------------------------
-#  Fallback model chains (ordered by benchmark composite score)
+#  Fallback model chains (ordered by August 2026 benchmark composite score)
 #  Each role maps to a list: [primary, fallback_1, fallback_2, ...]
+#
+#  Re-benchmarked: 2026-08-11 on 8 live models (4 SLM, 4 LLM).
+#  Judge: llama-3.3-70b-versatile (not under test → no TPM conflict).
+#  Composite = (ROUGE1 + BLEU + METEOR + Faithfulness + (1-Hallucination)) / 5
+#
+#  SLM ranking (non-deprecated):
+#    compound-mini 0.671 > gpt-oss-20b 0.628 > allam-2-7b 0.614
+#  LLM ranking (non-deprecated, all 5/5 cases):
+#    gpt-oss-120b 0.548 > qwen3.6-27b 0.522
+#    (groq/compound 0.628 but only 4/5 — uses gpt-oss-120b internally,
+#     same TPM bucket; kept as last-resort only)
+#
+#  Deprecated models removed (shutdown Aug 16 2026):
+#    llama-3.1-8b-instant (was best SLM at 0.739 — no longer available)
+#    llama-3.3-70b-versatile (was #2 LLM at 0.610 — no longer available)
 # ---------------------------------------------------------------------------
 MODEL_FALLBACKS: dict[str, list[str]] = {
-    # SLM — intent recognition (benchmark: groq_benchmark_metrics.json → slm_benchmark)
+    # SLM — intent recognition  (Stage 1)
+    # Benchmark Aug 11 2026: compound-mini > gpt-oss-20b > allam-2-7b
     "slm_intent": [
-        "meta-llama/llama-4-scout-17b-16e-instruct",   # 0.7903
-        "llama-3.1-8b-instant",                          # 0.7349
-        "meta-llama/llama-4-maverick-17b-128e-instruct", # 0.7247
+        "groq/compound-mini",    # composite=0.671, R1=0.589, Faith=0.88, free-tier
+        "openai/gpt-oss-20b",    # composite=0.628, R1=0.571, Faith=0.94
+        "allam-2-7b",            # composite=0.614, R1=0.584, Faith=0.78, fastest
     ],
-    # LLM — legal reasoning (benchmark: groq_benchmark_metrics.json → llm_benchmark)
+    # LLM — legal reasoning  (Stage 2)
+    # Benchmark Aug 11 2026: gpt-oss-120b > qwen3.6-27b (both 5/5 complete)
+    # groq/compound uses gpt-oss-120b internally → same TPM; kept as last-resort
     "llm_reasoning": [
-        "moonshotai/kimi-k2-instruct-0905",   # 0.6314
-        "moonshotai/kimi-k2-instruct",         # 0.6281
-        "llama-3.3-70b-versatile",             # 0.6090
+        "openai/gpt-oss-120b",   # composite=0.548, R1=0.480, Faith=0.76  (5/5)
+        "qwen/qwen3.6-27b",      # composite=0.522, R1=0.415, Faith=0.88  (5/5)
+        "groq/compound",         # composite=0.628 (4/5 cases only) — last-resort
     ],
-    # Summarisation / Stage-2 helpers (benchmark: model_benchmark_latest.json)
+    # Summarisation / Stage-2 helpers
+    # Prefer fast SLM; escalate to LLM if quality demands it
     "summarisation": [
-        "llama-3.1-8b-instant",       # 0.6081
-        "llama-3.3-70b-versatile",     # 0.4900
+        "groq/compound-mini",    # best SLM, free-tier
+        "openai/gpt-oss-20b",    # reliable paid SLM fallback
+        "qwen/qwen3.6-27b",      # LLM quality fallback
     ],
-    # Q&A — PrecedentQA (uses summarisation models)
+    # Q&A — PrecedentQA
     "qa": [
-        "llama-3.1-8b-instant",
-        "llama-3.3-70b-versatile",
+        "groq/compound-mini",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.6-27b",
     ],
 }
 
 
 def get_fallback_chain(role: str) -> list[str]:
     """Return the ordered fallback chain for a given role."""
-    return list(MODEL_FALLBACKS.get(role, ["llama-3.1-8b-instant"]))
+    return list(MODEL_FALLBACKS.get(role, ["openai/gpt-oss-20b"]))
 
 
 # ---------------------------------------------------------------------------
