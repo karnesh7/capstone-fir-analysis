@@ -88,6 +88,9 @@ Create a `.env` file in the repository root with the required keys:
 GROQ_API_KEY=your_groq_api_key
 KANOON_API_KEY=your_indiankanoon_api_key
 PINECONE_API_KEY=your_pinecone_api_key
+
+# Optional (for Google Sign-In)
+REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 If you use OCR locally, you may also need the extra packages listed at the bottom of `requirements.txt`.
@@ -106,16 +109,23 @@ cd capstone_project
 Install Python dependencies:
 
 ```bash
-cd backend
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 ```
 
-### 3. Frontend setup
+### 3. Initialize Statute Vectors & Pinecone (First-time setup only)
+
+Run the one-time dataset extraction and vector deployment script to parse IPC/BNS statutes, generate embeddings, and populate your Pinecone index:
+
+```bash
+python preprocessing/build_statute_dataset.py
+```
+
+### 4. Frontend setup
 
 Install Node dependencies:
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
 ```
 
