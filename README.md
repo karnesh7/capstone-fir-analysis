@@ -1,334 +1,443 @@
-# LexIR
+# LexIR — Legal Intelligence & Retrieval System for FIR Analysis
 
-LexIR is a legal intelligence and retrieval system for FIR analysis. It takes FIR details and allegations, maps them to applicable IPC/BNS sections, searches Indian Kanoon for precedent cases, summarizes the retrieved judgments, predicts the likely verdict, and supports follow-up legal questions in a chat-style interface.
+> **Capstone Project** — An AI-powered pipeline that maps FIR allegations to IPC/BNS statutes, retrieves real Indian court precedents, predicts likely verdicts, and enables follow-up legal Q&A — all in a live, chat-style interface.
 
-The project is split into a Python backend and a React frontend:
+---
 
-- Backend: FastAPI, WebSockets, Groq, Pinecone, Indian Kanoon, MongoDB
-- Frontend: React with a live chat / stage-based analysis UI
+## Table of Contents
 
-## What The App Does
+- [Overview](#overview)
+- [How the Pipeline Works](#how-the-pipeline-works)
+- [Tech Stack](#tech-stack)
+- [Repository Layout](#repository-layout)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Running the App](#running-the-app)
+- [API Reference](#api-reference)
+- [Frontend UI](#frontend-ui)
+- [Model Selection & Fallback System](#model-selection--fallback-system)
+- [Evaluation & Benchmarking](#evaluation--benchmarking)
+- [Data Storage](#data-storage)
+- [Troubleshooting](#troubleshooting)
+- [Development Notes](#development-notes)
 
-LexIR runs in three stages:
+---
 
-1. Stage 1, FIR analysis
-   - Reads the structured FIR incident facts
-   - Identifies likely criminal intent and applicable IPC/BNS sections
-   - Uses the RAG pipeline and statute retrieval to narrow down relevant legal provisions
+## Overview
 
-2. Stage 2, precedent search
-   - Builds a search query from the FIR facts and mapped sections
-   - Calls the Indian Kanoon API to fetch real judgments
-   - Summarizes each retrieved case
-   - Predicts verdict, punishment, and section influence
+**LexIR** is a full-stack legal analysis system built for analyzing First Information Reports (FIRs) under Indian law. Given a structured FIR with incident facts and allegations, LexIR:
 
-3. Stage 3, legal Q&A
-   - Answers follow-up legal questions using the FIR context and prior analysis
-   - Reuses stage 1 and stage 2 results so answers stay grounded in the same case
+1. Identifies applicable **IPC / BNS sections** using a RAG-based statute retrieval pipeline over **865+ vectorized provisions**.
+2. Features an **interactive IPC ↔ BNS (2023) cross-comparison modal** highlighting statutory definitions, penalties, and modernization notes.
+3. Distinguishes between **criminal matters** and **civil/consumer disputes** — skipping criminal section mapping when the facts indicate a contract or quality disagreement.
+4. Searches **Indian Kanoon** for real precedent judgments and summarizes them.
+5. **Predicts the likely verdict and punishment** based on retrieved court precedents.
+6. Answers **follow-up legal questions** grounded in the FIR context and prior analysis.
+7. Displays **live pipeline telemetry** (RAG latency, Groq LLM model info, vectors scanned).
+8. Exports complete **Legal Case Briefs (.md)** and official **Form IF-1 FIR PDFs**.
+9. Includes **1-click demo scenarios** (Cyber Fraud, Armed Robbery, Road Accident, Contract Dispute) for instant evaluation.
 
-There is also support for:
+The system is split into a Python/FastAPI backend and a React 19 frontend, communicating over WebSockets.
 
-- FIR PDF generation
-- Persistent chat/session history in MongoDB
+---
 
-## Repository Layout
+## How the Pipeline Works
 
-```text
-backend/
-  server.py
-  api/
-    rag_llm_chain_prompting.py
-    indian_kanoon.py
-    precedent_qa.py
-    ws_handlers.py
-    groq_prompts.py
-    fir_pdf_generator.py
-    fir_pdf_mapper.py
-frontend/
-  src/
-    components/
-    hooks/
-src_dataset_files/
-output/
-logs/
-```
+### Stage 1 — FIR Analysis & Statute Mapping
+
+The backend receives FIR text over the WebSocket connection and runs the statute retrieval pipeline:
+
+- Classifies the **primary legal nature** of the complaint (criminal vs. civil/consumer)
+- For **criminal matters**: maps the FIR to applicable IPC/BNS sections using vector similarity search (Pinecone) and LLM-based legal reasoning
+- For **civil/consumer disputes**: returns zero criminal sections and provides the appropriate civil/consumer legal basis instead
+- The Stage 1 card in the UI shows statute numbers and corresponding BNS sections — not raw offense title text
+
+Key files:
+- `backend/api/rag_llm_chain_prompting.py` — RAG chain and statute retrieval
+- `backend/api/intent_queries.py` — Intent classification queries
+- `backend/api/formatters.py` — Output formatting
+
+---
+
+### Stage 2 — Indian Kanoon Precedent Search
+
+Runs **only for criminal matters**. The pipeline:
+
+1. Builds a search query from FIR facts and mapped sections
+2. Calls the **Indian Kanoon API** to fetch real judgments
+3. Retrieves and summarizes full judgment text for each case
+4. **Predicts verdict and punishment** from the retrieved cases
+5. Ranks the **influence of each applicable section** on the verdict
+
+Key files:
+- `backend/api/indian_kanoon.py` — Kanoon API client and caching
+- `backend/api/groq_prompts.py` — LLM prompts for summarization and prediction
+
+---
+
+### Stage 3 — Legal Q&A
+
+After the analysis completes, users can ask follow-up legal questions. Stage 3 reuses the already-computed session data (Stage 1 + Stage 2 results), so answers are grounded in the same case context without re-running the pipeline.
+
+Key files:
+- `backend/api/precedent_qa.py` — Q&A engine
+- `backend/api/ws_handlers.py` — WebSocket message routing
+
+---
 
 ## Tech Stack
 
 ### Backend
-- FastAPI
-- WebSockets
-- Groq LLM
-- Pinecone vector search
-- Indian Kanoon API
-- MongoDB for chat/session storage
-- python-dotenv for configuration
-- sentence-transformers and numpy for retrieval / ranking helpers
+
+| Component | Library / Service |
+|---|---|
+| API Framework | FastAPI + Uvicorn |
+| Real-time Comms | WebSockets |
+| LLM Provider | Groq (Llama 4, Kimi K2, Llama 3.x) |
+| Embeddings | `sentence-transformers` |
+| Vector Search | Pinecone |
+| Legal Database | Indian Kanoon API |
+| Session Storage | MongoDB (`pymongo`) |
+| PDF Generation | `fpdf2`, `PyPDF2` |
+| Config | `python-dotenv` |
+| Schema Validation | Pydantic v2 |
 
 ### Frontend
-- React 19
-- react-scripts
-- lucide-react icons
-- WebSocket-based state updates
 
-## Requirements
+| Component | Library |
+|---|---|
+| Framework | React 19 |
+| Routing | React Router v7 |
+| Auth | `@react-oauth/google`, `jwt-decode` |
+| Icons | `lucide-react` |
+| Data Fetching | WebSocket (native) |
+| Bundler | Create React App (`react-scripts`) |
 
-- Python 3.10 or newer
-- Node.js 18 or newer
-- MongoDB running locally at `mongodb://localhost:27017`
-- API keys in a `.env` file at the project root
+---
+
+## Repository Layout
+
+```text
+capstone-fir-analysis/
+├── backend/
+│   ├── server.py                        # FastAPI app, HTTP endpoints, WebSocket entrypoint
+│   ├── api/
+│   │   ├── ws_handlers.py               # WebSocket message dispatch & session lifecycle
+│   │   ├── rag_llm_chain_prompting.py   # Stage 1 RAG chain & statute retrieval
+│   │   ├── indian_kanoon.py             # Stage 2 Kanoon API client & caching
+│   │   ├── groq_prompts.py              # LLM prompt builders (summarisation, verdict, Q&A)
+│   │   ├── precedent_qa.py              # Stage 3 Q&A engine
+│   │   ├── model_config.py              # Model fallback chains & auto-selection
+│   │   ├── intent_queries.py            # Intent classification helper
+│   │   ├── formatters.py                # Stage output formatters
+│   │   ├── kanoon_cache.py              # In-process Kanoon response cache
+│   │   ├── schemas.py                   # Shared Pydantic schemas
+│   │   ├── fir_pdf_generator.py         # PDF rendering from FIR data
+│   │   └── fir_pdf_mapper.py            # Maps raw FIR fields to PDF layout
+│   └── evaluation/                      # Benchmark & evaluation scripts (see below)
+│
+├── frontend/
+│   └── src/
+│       ├── App.js                       # Top-level layout, routing, brief export & auth gate
+│       ├── hooks/
+│       │   └── useLexIR.js              # WebSocket state management & analysis orchestration
+│       ├── data/
+│       │   └── presetScenarios.js       # Pre-loaded 1-click test scenarios
+│       └── components/
+│           ├── ChatArea.js / .css       # Main chat + stage card rendering
+│           ├── Stage1Card.js / .css     # Stage 1 output (statutes, telemetry & comparison modal)
+│           ├── Stage2Card.js / .css     # Stage 2 output (precedents, verdict & Kanoon telemetry)
+│           ├── VerdictCard.js           # Verdict & punishment display
+│           ├── SectionInfluence.js      # Section influence ranking
+│           ├── KanoonCaseList.js        # Precedent case list
+│           ├── FIRForm.js / .css        # Multi-field FIR input form with 1-click scenario pills
+│           ├── ChatInput.js / .css      # Q&A input box
+│           ├── Sidebar.js / .css        # Session history & controls
+│           ├── SessionList.js           # Session list inside sidebar
+│           ├── ChatHistory.js           # Per-session message history
+│           └── LoginPage.js / Login.css # Google OAuth & direct login screen
+│
+├── preprocessing/
+│   ├── build_statute_dataset.py         # Parse IPC/BNS statutes, generate embeddings & deploy
+│   ├── deploy_to_pinecone.py            # Upload statute vectors to Pinecone
+│   └── test_vector_db.py               # Smoke-test the Pinecone index
+│
+├── src_dataset_files/                   # Raw statute and dataset files
+├── output/                              # Benchmark outputs & generated artifacts
+├── logs/                                # Audit and run logs
+├── requirements.txt
+└── .env                                 # API keys (not committed)
+```
+
+---
 
 ## Environment Variables
 
-Create a `.env` file in the repository root with the required keys:
+Create a `.env` file in the **repository root** with the following keys:
 
 ```env
+# Required
 GROQ_API_KEY=your_groq_api_key
-KANOON_API_KEY=your_indiankanoon_api_key
+KANOON_API_KEY=your_indian_kanoon_api_key
 PINECONE_API_KEY=your_pinecone_api_key
 
-# Optional (for Google Sign-In)
-REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
+# Optional — Google Sign-In
+REACT_APP_GOOGLE_CLIENT_ID=your_google_oauth_client_id
+
+# Optional — Override the default Groq model
+GROQ_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 ```
+
+> The frontend reads the `.env` at build time via `dotenv-cli` (configured in `package.json` scripts). Both backend and frontend pick up keys from the same root `.env`.
+
+---
 
 ## Installation
 
-### 1. Clone the project
+### Prerequisites
+
+- Python **3.10+**
+- Node.js **18+**
+- MongoDB running locally at `mongodb://localhost:27017`
+- API keys for Groq, Indian Kanoon, and Pinecone
+
+---
+
+### 1. Clone the repository
 
 ```bash
 git clone <your-repo-url>
-cd capstone_project
+cd capstone-fir-analysis
 ```
 
-### 2. Backend setup
+### 2. Set up environment variables
 
-Install Python dependencies:
+Create a `.env` file in the repository root and fill in your API keys (see [Environment Variables](#environment-variables)).
+
+### 3. Install Python dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Initialize Statute Vectors & Pinecone (First-time setup only)
+### 4. Initialize Pinecone vectors (first-time only)
 
-Run the one-time dataset extraction and vector deployment script to parse IPC/BNS statutes, generate embeddings, and populate your Pinecone index:
+Parse IPC/BNS statute files, generate embeddings, and automatically populate your Pinecone index:
 
 ```bash
 python preprocessing/build_statute_dataset.py
 ```
 
-### 4. Frontend setup
+Verify the index is populated:
 
-Install Node dependencies:
+```bash
+python preprocessing/test_vector_db.py
+```
+
+### 5. Install frontend dependencies
 
 ```bash
 cd frontend
 npm install
 ```
 
-## How To Run
+---
 
-### Start MongoDB
+## Running the App
 
-Make sure MongoDB is running locally. The backend expects:
+### Step 1 — Start MongoDB
 
-```text
-mongodb://localhost:27017
-```
+Ensure MongoDB is running locally at `mongodb://localhost:27017`.
 
-If MongoDB is unavailable, the app can still start, but chat history persistence will not work.
+If MongoDB is unavailable, the app will still start, but session/chat history persistence will be disabled.
 
-### Start the backend
+### Step 2 — Start the backend
 
-From the `backend` directory:
+From the **`backend/`** directory:
 
 ```bash
 uvicorn server:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend health endpoint:
+Verify it's running:
 
-```text
-http://localhost:8000/health
+```
+GET http://localhost:8000/health
 ```
 
-### Start the frontend
+### Step 3 — Start the frontend
 
-From the `frontend` directory:
+From the **`frontend/`** directory:
 
 ```bash
 npm start
 ```
 
-The frontend runs on:
+The app opens at `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
+---
 
-## How The Pipeline Works
+## API Reference
 
-### Stage 1, FIR Analysis
+### HTTP Endpoints
 
-The backend receives FIR text through the WebSocket connection and runs the statute retrieval pipeline. It identifies the primary legal nature of the matter, and then either maps the FIR to IPC/BNS sections or classifies it as a civil / consumer dispute when the facts show only a contract or quality disagreement without deception, force, or coercion.
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Health check and loaded model status |
+| `GET` | `/api/fir/sample` | Returns a sample FIR payload |
+| `POST` | `/api/fir/json` | Submit FIR as JSON |
+| `POST` | `/api/fir/pdf-payload` | Generate PDF payload from FIR data |
+| `POST` | `/api/fir/pdf` | Generate and download Form IF-1 FIR PDF |
+| `GET` | `/api/sessions` | List saved chat sessions |
+| `POST` | `/api/auth/login` | Record user profile session in MongoDB |
 
-Relevant code paths:
+### WebSocket — `/ws`
 
-- `backend/api/rag_llm_chain_prompting.py`
-- `backend/api/intent_queries.py`
-- `backend/api/formatters.py`
+The primary communication channel. The frontend sends typed JSON messages; the backend streams status updates, thought steps, and stage results back in real time.
 
-### Stage 1 Output Notes
+| Message Type | Direction | Description |
+|---|---|---|
+| `start_analysis` | Client → Server | Begin FIR analysis (Stage 1) |
+| `run_full_analysis` | Client → Server | Run the full pipeline (Stages 1–2) |
+| `ask_question` | Client → Server | Ask a follow-up legal question (Stage 3) |
+| `list_sessions` | Client → Server | Fetch all saved sessions |
+| `get_history` | Client → Server | Retrieve a specific session's messages |
+| `clear_session` | Client → Server | Delete a saved session |
+| `rename_session` | Client → Server | Rename a saved session |
 
-- Criminal matters show clean IPC/BNS section labels in the UI
-- Civil / contract disputes return `Applicable Sections (0)` and a civil/consumer legal basis instead of cheating/fraud sections
-- The stage 1 card displays the statute numbers and any corresponding BNS sections, not the offense title text
+The server emits `status`, `thought`, and stage-specific result events during analysis.
 
-### Stage 2, Indian Kanoon Precedents
+---
 
-Stage 2 runs only when the matter is treated as criminal. It does the following:
+## Frontend UI
 
-1. Builds a Kanoon search query from the FIR facts and mapped sections
-2. Searches Indian Kanoon for real precedent cases
-3. Fetches full judgment text for each case
-4. Summarizes the judgment text
-5. Predicts verdict and punishment from the retrieved cases
-6. Ranks the influence of applicable sections on the verdict
+The frontend is a single-page application with a sidebar and a main chat area:
 
-Relevant code paths:
+| Component | Role |
+|---|---|
+| `LoginPage` | Google OAuth & direct login fallback screen |
+| `App.js` | Root layout, routing, legal brief export, and auth state |
+| `useLexIR` | Central hook — WebSocket connection, analysis state, session management |
+| `FIRForm` | Multi-field FIR input form with 1-click preset scenarios |
+| `Stage1Card` | Displays statute mapping results, latency telemetry, and interactive IPC ↔ BNS comparison modal |
+| `Stage2Card` | Displays precedent cases, verdict prediction, Kanoon telemetry, and section influence |
+| `VerdictCard` | Dedicated verdict probability and punishment range summary |
+| `SectionInfluence` | Ranks sections by their influence on the predicted verdict |
+| `KanoonCaseList` | Lists and summarizes retrieved Indian Kanoon judgments |
+| `Sidebar` | Session list, rename, delete, and navigation controls |
+| `ChatInput` | Q&A input for Stage 3 follow-up questions |
 
-- `backend/api/indian_kanoon.py`
-- `backend/api/groq_prompts.py`
+---
 
-### Stage 3, Question Answering
+## Model Selection & Fallback System
 
-Stage 3 uses the FIR analysis and precedent results to answer user questions in context. The stage runs over the already computed session data instead of starting from scratch.
+LexIR uses a **role-based model fallback chain** defined in `backend/api/model_config.py`. Each pipeline role has an ordered list of models; if the primary model is rate-limited or unavailable, the system automatically retries with the next model in the chain.
 
-Relevant code paths:
+| Role | Primary Model | Fallbacks |
+|---|---|---|
+| `slm_intent` (intent classification) | `llama-4-scout-17b-16e-instruct` | `llama-3.1-8b-instant`, `llama-4-maverick-17b` |
+| `llm_reasoning` (legal reasoning) | `moonshotai/kimi-k2-instruct-0905` | `kimi-k2-instruct`, `llama-3.3-70b-versatile` |
+| `summarisation` | `llama-3.1-8b-instant` | `llama-3.3-70b-versatile` |
+| `qa` (Stage 3 Q&A) | `llama-3.1-8b-instant` | `llama-3.3-70b-versatile` |
 
-- `backend/api/precedent_qa.py`
-- `backend/api/ws_handlers.py`
+You can override the model for any session by setting `GROQ_MODEL` in `.env`.
 
-## WebSocket Message Flow
+---
 
-The frontend and backend communicate over `/ws`.
+## Evaluation & Benchmarking
 
-Common message types:
+The `backend/evaluation/` directory contains standalone benchmark scripts used during development to evaluate and tune the pipeline:
 
-- `start_analysis` — begin FIR analysis
-- `run_full_analysis` — run the full pipeline
-- `ask_question` — ask a follow-up legal question
-- `list_sessions` — fetch saved chat sessions
-- `get_history` — fetch a saved session’s messages
-- `clear_session` — delete a saved session
-- `rename_session` — rename a saved session
+| Script | Purpose |
+|---|---|
+| `benchmark_algorithmic_vs_llm.py` | Compares rule-based vs. LLM statute mapping |
+| `benchmark_groq_metrics.py` | Evaluates Groq models across pipeline roles |
+| `benchmark_groq_pipeline_models.py` | End-to-end pipeline model comparison |
+| `benchmark_feature2_kanoon_live.py` | Live Kanoon retrieval quality |
+| `benchmark_feature_2_summarization.py` | Judgment summarization quality |
+| `benchmark_feature_3_ranking.py` | Section influence ranking accuracy |
+| `benchmark_groq_summarization.py` | Summarization model comparison |
+| `benchmark_negative_rule_semantic.py` | Civil vs. criminal detection accuracy |
+| `benchmark_response_time.py` | End-to-end latency profiling |
+| `compare_summary_approaches.py` | Compares summarization strategies |
+| `demo_negative_rules_filter.py` | Demonstrates civil/consumer dispute filtering |
 
-During the analysis flow the backend sends status and thought updates, then stage results.
+Benchmark results are written to `output/` and can influence automatic model selection via `output/model_benchmark_latest.json`.
 
-## HTTP Endpoints
-
-### Health and FIR helpers
-
-- `GET /health`
-- `GET /api/fir/sample`
-- `POST /api/fir/json`
-- `POST /api/fir/pdf-payload`
-- `POST /api/fir/pdf`
-- `POST /api/fir/upload`
-
-### Session storage
-
-- `GET /api/sessions`
-
-## Frontend UI Summary
-
-The frontend is organized around the live chat and stage cards:
-
-- `ChatArea` renders stage output, system messages, user messages, assistant messages, and loading/thought updates
-- `Stage1Card` shows FIR mapping details
-- `Stage2Card` shows precedent cases and verdict prediction
-- `Sidebar` shows session history and controls
-- `useLexIR` manages WebSocket state and app-level analysis state
+---
 
 ## Data Storage
 
 ### MongoDB
 
-Chat sessions are stored in a `chat_sessions` collection. Each session stores:
+Chat sessions are stored in a `chat_sessions` collection. Each document contains:
 
-- Session ID
-- FIR preview
-- Created timestamp
-- Message history
+- `session_id` — unique identifier
+- `fir_preview` — short preview of the FIR text
+- `created_at` — timestamp
+- `messages` — full message history (user + assistant)
 
-### Output and logs
+### Output & Logs
 
-The project also writes to:
+| Directory | Contents |
+|---|---|
+| `output/` | Benchmark JSON results, generated artifacts, `model_benchmark_latest.json` |
+| `logs/` | Audit logs and run traces |
 
-- `output/` for generated artifacts and benchmark outputs
-- `logs/` for audit logs
+---
 
 ## Troubleshooting
 
 ### Backend fails to start
 
-Check that:
-
-- Python dependencies are installed
-- `.env` contains the required API keys
-- MongoDB is running locally
-- Port 8000 is free
+- Confirm all Python dependencies are installed: `pip install -r requirements.txt`
+- Verify `.env` contains `GROQ_API_KEY`, `KANOON_API_KEY`, and `PINECONE_API_KEY`
+- Ensure MongoDB is running (or set it to start automatically)
+- Confirm port `8000` is not already in use
 
 ### Frontend shows no results
 
-Check that:
-
-- Backend is running on port 8000
-- The WebSocket URL is reachable
-- Your `.env` values are loaded correctly
+- Verify the backend is running and reachable at `http://localhost:8000/health`
+- Check that the WebSocket connection at `ws://localhost:8000/ws` is not blocked by a firewall or proxy
+- Confirm the `.env` file is in the **repository root**, not inside the `frontend/` directory
 
 ### Stage 2 returns no cases
 
-This usually means one of the following:
+This is expected if:
+- The FIR describes a **civil or consumer dispute** — Stage 2 is intentionally skipped
+- The Kanoon search query is too narrow for the available case database
+- The `KANOON_API_KEY` is missing or invalid
 
-- The FIR query is too narrow
-- Indian Kanoon returned no results for the current query terms
-- The API key is missing or invalid
+### Google Sign-In not working
 
-If the input is a civil / contract dispute, stage 2 is intentionally skipped and stage 1 will return zero criminal sections.
+- Ensure `REACT_APP_GOOGLE_CLIENT_ID` is set in `.env`
+- The frontend reads this at **build/start time** via `dotenv-cli`, so restart `npm start` after updating `.env`
+- Verify the OAuth client ID in Google Cloud Console allows `http://localhost:3000` as an authorized origin
+
+---
 
 ## Development Notes
 
-- Keep backend changes focused; the project is already split by stage and feature
-- Use the existing stage files rather than moving logic into `server.py`
-- When updating the retrieval pipeline, verify the frontend stage cards still match the backend payload shape
+- Keep backend changes focused — logic is split by stage and feature; avoid consolidating into `server.py`
+- Use existing stage files (`rag_llm_chain_prompting.py`, `indian_kanoon.py`, `precedent_qa.py`) as the primary extension points
+- When updating the retrieval pipeline, verify that the frontend stage card components still match the backend payload shape
+- The frontend's `.env` is loaded via `dotenv-cli` in `npm start`/`npm run build` — it reads from the **project root**, not from the `frontend/` directory
+- Benchmark scripts in `evaluation/` are standalone — run them from the `backend/` directory with the root `.env` active
 
-## Useful Files
+---
 
-- [backend/server.py](backend/server.py)
-- [backend/api/ws_handlers.py](backend/api/ws_handlers.py)
-- [backend/api/indian_kanoon.py](backend/api/indian_kanoon.py)
-- [backend/api/rag_llm_chain_prompting.py](backend/api/rag_llm_chain_prompting.py)
-- [backend/api/precedent_qa.py](backend/api/precedent_qa.py)
-- [frontend/src/hooks/useLexIR.js](frontend/src/hooks/useLexIR.js)
-- [frontend/src/components/ChatArea.js](frontend/src/components/ChatArea.js)
-- [frontend/src/components/Stage1Card.js](frontend/src/components/Stage1Card.js)
-- [frontend/src/components/Stage2Card.js](frontend/src/components/Stage2Card.js)
+## Key Files at a Glance
 
-## Current Status
-
-The project currently supports:
-
-- Structured FIR analysis and legal reasoning
-- Statute mapping and stage-based reasoning
-- Civil / contract dispute detection with zero criminal sections when appropriate
-- Indian Kanoon precedent retrieval
-- Case summaries and verdict prediction
-- Chat history and session persistence
-- Follow-up legal Q&A
-
-## Next Steps
-
-- Improve precedent retrieval quality for more specific FIR fact patterns
-- Continue tuning stage 2 ranking and summarization
-- Expand civil-vs-criminal detection coverage for more non-criminal complaint patterns
-- Extend the frontend history and session management UX if needed
+| File | Purpose |
+|---|---|
+| `backend/server.py` | FastAPI app entry point & REST endpoints |
+| `backend/api/ws_handlers.py` | WebSocket session lifecycle, timing & dispatch |
+| `backend/api/rag_llm_chain_prompting.py` | Stage 1 statute retrieval RAG pipeline |
+| `backend/api/indian_kanoon.py` | Stage 2 Kanoon client & judgment caching |
+| `backend/api/groq_prompts.py` | LLM prompt definitions (summarization, verdict) |
+| `backend/api/precedent_qa.py` | Stage 3 Q&A engine |
+| `backend/api/model_config.py` | Model fallback chains & dynamic routing |
+| `frontend/src/hooks/useLexIR.js` | Frontend state & WS orchestration |
+| `frontend/src/App.js` | Root app component, export brief handler & auth routing |
+| `frontend/src/data/presetScenarios.js` | 1-Click realistic scenario cases for testing |
+| `preprocessing/build_statute_dataset.py` | One-time statute dataset extraction & Pinecone vector build |
