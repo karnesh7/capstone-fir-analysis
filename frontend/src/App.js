@@ -141,11 +141,14 @@ function App() {
   }, [fir, stage1]);
 
   if (!user) {
-    return (
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
-      </GoogleOAuthProvider>
-    );
+    if (GOOGLE_CLIENT_ID) {
+      return (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <LoginPage onLoginSuccess={handleLoginSuccess} hasGoogleAuth={true} />
+        </GoogleOAuthProvider>
+      );
+    }
+    return <LoginPage onLoginSuccess={handleLoginSuccess} hasGoogleAuth={false} />;
   }
 
   return (

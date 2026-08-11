@@ -37,4 +37,67 @@
 .google-login-btn {
   display: flex;
   justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  color: #666;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.login-divider span {
+  padding: 0 0.75rem;
+}
+
+.direct-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.login-guest-btn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.25rem;
+}
+
+.login-guest-btn:hover {
+  background: #1d4ed8;
 }
