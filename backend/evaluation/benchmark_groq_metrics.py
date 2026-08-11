@@ -43,22 +43,25 @@ from rouge_score import rouge_scorer
 # =====================================================================
 #  CONFIGURATION
 # =====================================================================
+# NOTE: Using llama-3.3-70b-versatile as judge until its Aug 16 2026 shutdown.
+# It is NOT a candidate under test, so no TPM conflict with the benchmarked models.
+# After Aug 16, switch to: JUDGE_MODEL = "openai/gpt-oss-120b"
 JUDGE_MODEL = "llama-3.3-70b-versatile"
 
 # Approximate Groq pricing USD / 1 M tokens  (input, output)
-# Updated for models available as of early 2026
+# Updated August 2026 — reflects currently live models after mass deprecation
 PRICING: dict[str, tuple[float, float]] = {
-    "allam-2-7b":                                    (0.05, 0.08),
-    "compound-beta":                                 (0.00, 0.00),
-    "compound-beta-mini":                            (0.00, 0.00),
-    "llama-3.1-8b-instant":                          (0.05, 0.08),
-    "llama-3.3-70b-versatile":                       (0.59, 0.79),
-    "meta-llama/llama-4-maverick-17b-128e-instruct": (0.50, 0.77),
-    "meta-llama/llama-4-scout-17b-16e-instruct":     (0.11, 0.34),
-    "meta-llama/llama-guard-4-12b":                  (0.20, 0.20),
-    "moonshotai/kimi-k2-instruct":                   (0.20, 0.60),
-    "openai/gpt-oss-120b":                           (1.20, 3.60),
-    "qwen-qwq-32b":                                  (0.29, 0.39),
+    # --- Active SLMs ---
+    "allam-2-7b":              (0.05, 0.08),
+    "openai/gpt-oss-20b":      (0.11, 0.33),   # recommended replacement for llama-3.1-8b-instant
+    "groq/compound-mini":      (0.00, 0.00),   # compound-mini (renamed)
+    # --- Active LLMs ---
+    "openai/gpt-oss-120b":     (1.20, 3.60),   # recommended replacement for 70B+ models
+    "qwen/qwen3.6-27b":        (0.29, 0.79),   # recommended replacement for qwen3-32b / llama-4-scout
+    "groq/compound":           (0.00, 0.00),   # compound (renamed)
+    # --- Deprecated: shutting down Aug 16 2026 (keep until final cutover) ---
+    "llama-3.1-8b-instant":    (0.05, 0.08),
+    "llama-3.3-70b-versatile": (0.59, 0.79),
 }
 
 EXCLUDED_PATTERNS = [r"^whisper", r"guard", r"safeguard", r"orpheus"]

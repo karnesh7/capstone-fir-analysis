@@ -34,24 +34,24 @@ from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
 
 
+# Updated August 2026 — reflects currently live Groq models after mass deprecation
 DEFAULT_CANDIDATE_MODELS = [
-    "llama-3.1-8b-instant",
-    "llama-3.3-70b-versatile",
+    "groq/compound-mini",
+    "openai/gpt-oss-20b",
+    "allam-2-7b",
+    "qwen/qwen3.6-27b",
     "openai/gpt-oss-120b",
-    "gemma2-9b-it",
-    "mixtral-8x7b-32768",
+    "groq/compound",
 ]
 
 # Approximate list-price defaults (USD per 1M tokens) for comparative analysis.
-# Adjust with environment variables if needed:
-#   PRICE_INPUT_<SAFE_MODEL_NAME>
-#   PRICE_OUTPUT_<SAFE_MODEL_NAME>
 DEFAULT_PRICE_PER_1M = {
-    "llama-3.1-8b-instant": {"input": 0.05, "output": 0.08},
-    "llama-3.3-70b-versatile": {"input": 0.59, "output": 0.79},
-    "openai/gpt-oss-120b": {"input": 0.15, "output": 0.60},
-    "gemma2-9b-it": {"input": 0.10, "output": 0.10},
-    "mixtral-8x7b-32768": {"input": 0.24, "output": 0.24},
+    "groq/compound-mini":  {"input": 0.00, "output": 0.00},
+    "openai/gpt-oss-20b":  {"input": 0.11, "output": 0.33},
+    "allam-2-7b":          {"input": 0.05, "output": 0.08},
+    "qwen/qwen3.6-27b":    {"input": 0.29, "output": 0.79},
+    "openai/gpt-oss-120b": {"input": 1.20, "output": 3.60},
+    "groq/compound":       {"input": 0.00, "output": 0.00},
 }
 
 

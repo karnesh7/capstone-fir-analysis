@@ -60,6 +60,7 @@ EXCLUDED_PATTERNS = [
     r"^whisper",
     r"guard",
     r"safeguard",
+    r"orpheus",
 ]
 
 
