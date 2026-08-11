@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Send, ChevronUp } from 'lucide-react';
+import { Send, ChevronUp, Sparkles } from 'lucide-react';
+import { PRESET_SCENARIOS } from '../data/presetScenarios';
 import './FIRForm.css';
 
 const EMPTY = {
@@ -128,6 +129,10 @@ export default function FIRForm({
     if (!isHistory) setExpanded(false);
   };
 
+  const handleSelectPreset = (preset) => {
+    setForm(firToFormFields(preset.fir));
+  };
+
   if (!isExpanded && !isHistory) {
     return (
       <div className="fir-form-collapsed" onClick={() => setExpanded(true)}>
@@ -173,16 +178,6 @@ export default function FIRForm({
                 )}
               </>
             )}
-            {/* {hasAnalysis && !isHistory && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ padding: '4px 10px', fontSize: 12 }}
-                onClick={() => setExpanded(false)}
-              >
-                <ChevronUp size={14} /> Collapse
-              </button>
-            )} */}
             {!isHistory && (
               <button
                 type="button"
@@ -195,11 +190,27 @@ export default function FIRForm({
             )}
           </div>
         </div>
-        <p>
-          {isHistory
-            ? 'Read-only snapshot of the FIR for this session. Unlock to edit and run a new analysis.'
-            : 'Fill in the case details below, or use the sample FIR to try the system.'}
-        </p>
+        <p>Fill out the incident details below or select a 1-click test scenario.</p>
+
+        {!isHistory && (
+          <div className="preset-scenarios-bar">
+            <span className="preset-label"><Sparkles size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> 1-Click Demo Scenarios:</span>
+            <div className="preset-pills">
+              {PRESET_SCENARIOS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="preset-pill"
+                  onClick={() => handleSelectPreset(preset)}
+                  title={preset.description}
+                  disabled={disabled}
+                >
+                  {preset.badge}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ---- Case core ---- */}

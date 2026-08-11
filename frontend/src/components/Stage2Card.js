@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Scale, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Scale, ChevronDown, ChevronUp, Search, Zap } from 'lucide-react';
 import './Stage2Card.css';
 import VerdictCard from './VerdictCard';
 import SectionInfluence from './SectionInfluence';
@@ -11,7 +11,7 @@ export default function Stage2Card({ data }) {
   if (!data) return null;
 
   const { status, sections_searched, cases, verdict_prediction,
-          section_influence, api_calls_used, error } = data;
+          section_influence, api_calls_used, error, telemetry } = data;
 
   /* ---------- error state ---------- */
   if (status === 'error') {
@@ -52,6 +52,14 @@ export default function Stage2Card({ data }) {
           {statusLabel}
         </span>
       </div>
+
+      {telemetry && (
+        <div className="telemetry-bar" style={{ marginTop: '10px' }}>
+          <span className="telemetry-pill">⚡ <strong>{telemetry.latency_s}s</strong> Kanoon search + verdict</span>
+          <span className="telemetry-pill">📡 {telemetry.cases_found} court precedents retrieved</span>
+          <span className="telemetry-pill">🤖 {telemetry.engine || 'Indian Kanoon API + Groq'}</span>
+        </div>
+      )}
 
       {sections_searched?.length > 0 && (
         <div className="kanoon-sections-searched">

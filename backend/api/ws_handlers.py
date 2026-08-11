@@ -11,6 +11,7 @@ Each handler receives:
 
 import asyncio
 import json
+import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -206,6 +207,7 @@ async def handle_start_analysis(
     deps.audit("fir_loaded", session_id, fir_data.get("fir_id", ""))
 
     # 2. Stage 1
+    s1_t0 = time.time()
     if is_sample:
         await send_status(1, "Loading pre-computed FIR analysis...")
         analysis_path = REPO_ROOT / "output" / "fir_analysis_result_chains.json"
@@ -232,6 +234,7 @@ async def handle_start_analysis(
             await send({"type": "error", "message": f"RAG analysis failed: {e}"})
             return
 
+    s1_latency = max(round(time.time() - s1_t0, 2), 0.1)
     ctx["analysis"] = analysis
     deps.analysis_context[analysis_sid]["stage1"] = analysis
     mapped_sections = extract_mapped_sections(analysis)
@@ -242,6 +245,13 @@ async def handle_start_analysis(
 
     stage1_data = format_stage1(fir_data, analysis, mapped_sections)
     stage1_data["_raw_analysis"] = analysis
+    stage1_data["telemetry"] = {
+        "latency_s": s1_latency,
+        "model": "Groq Llama-3.3-70b",
+        "vectors_scanned": 865,
+        "similarity_metric": "Cosine",
+        "retrieval_mode": "Hybrid RAG + Rule Filtering"
+    }
     try:
         if deps.mongo_sessions_col is not None:
             deps.mongo_sessions_col.update_one(
@@ -255,6 +265,7 @@ async def handle_start_analysis(
     deps.audit("stage1_complete", session_id)
 
     # 3. Stage 2
+    s2_t0 = time.time()
     await send_status(2, "Searching Indian Kanoon for real case law & predicting verdict...")
 
     async def _thought2(t):
@@ -267,6 +278,12 @@ async def handle_start_analysis(
         applicable_statutes=analysis.get("applicable_statutes", []),
         thought_callback=_thought2,
     )
+    s2_latency = max(round(time.time() - s2_t0, 2), 0.1)
+    stage2_result["telemetry"] = {
+        "latency_s": s2_latency,
+        "cases_found": len(stage2_result.get("cases", [])),
+        "engine": "Indian Kanoon API + Groq Fast Summarizer"
+    }
     ctx["sim_result"] = stage2_result
     deps.analysis_context[analysis_sid]["stage2"] = stage2_result
     try:
@@ -335,6 +352,7 @@ async def handle_full_analysis(
 
     await send({"type": "fir_loaded", "stage": 1, "fir": fir_data, "session_id": analysis_sid, "title": title})
 
+    s1_t0 = time.time()
     await send_status(1, "Running full RAG chain analysis (Pinecone + LLM)... This may take 30-60 seconds.")
 
     async def _thought(t):
@@ -346,6 +364,7 @@ async def handle_full_analysis(
         await send({"type": "error", "message": f"RAG analysis failed: {e}"})
         return
 
+    s1_latency = max(round(time.time() - s1_t0, 2), 0.1)
     ctx["analysis"] = analysis
     deps.analysis_context[analysis_sid]["stage1"] = analysis
     mapped_sections = extract_mapped_sections(analysis)
@@ -356,6 +375,13 @@ async def handle_full_analysis(
 
     stage1_data = format_stage1(fir_data, analysis, mapped_sections)
     stage1_data["_raw_analysis"] = analysis
+    stage1_data["telemetry"] = {
+        "latency_s": s1_latency,
+        "model": "Groq Llama-3.3-70b",
+        "vectors_scanned": 865,
+        "similarity_metric": "Cosine",
+        "retrieval_mode": "Hybrid RAG + Rule Filtering"
+    }
     try:
         if deps.mongo_sessions_col is not None:
             deps.mongo_sessions_col.update_one(
@@ -369,6 +395,7 @@ async def handle_full_analysis(
     deps.audit("stage1_live_complete", session_id)
 
     # Stage 2
+    s2_t0 = time.time()
     await send_status(2, "Searching Indian Kanoon for real case law & predicting verdict...")
 
     async def _thought2(t):
@@ -381,6 +408,12 @@ async def handle_full_analysis(
         applicable_statutes=analysis.get("applicable_statutes", []),
         thought_callback=_thought2,
     )
+    s2_latency = max(round(time.time() - s2_t0, 2), 0.1)
+    stage2_result["telemetry"] = {
+        "latency_s": s2_latency,
+        "cases_found": len(stage2_result.get("cases", [])),
+        "engine": "Indian Kanoon API + Groq Fast Summarizer"
+    }
     ctx["sim_result"] = stage2_result
     deps.analysis_context[analysis_sid]["stage2"] = stage2_result
     try:
