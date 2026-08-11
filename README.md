@@ -93,7 +93,7 @@ Key files:
 |---|---|
 | API Framework | FastAPI + Uvicorn |
 | Real-time Comms | WebSockets |
-| LLM Provider | Groq (Llama 4, Kimi K2, Llama 3.x) |
+| LLM Provider | Groq (`openai/gpt-oss-120b`, `groq/compound-mini`, `qwen/qwen3.6-27b`) |
 | Embeddings | `sentence-transformers` |
 | Vector Search | Pinecone |
 | Legal Database | Indian Kanoon API |
@@ -185,7 +185,7 @@ PINECONE_API_KEY=your_pinecone_api_key
 REACT_APP_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 
 # Optional — Override the default Groq model
-GROQ_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
+GROQ_MODEL=openai/gpt-oss-20b
 ```
 
 > The frontend reads the `.env` at build time via `dotenv-cli` (configured in `package.json` scripts). Both backend and frontend pick up keys from the same root `.env`.
@@ -333,12 +333,17 @@ The frontend is a single-page application with a sidebar and a main chat area:
 
 LexIR uses a **role-based model fallback chain** defined in `backend/api/model_config.py`. Each pipeline role has an ordered list of models; if the primary model is rate-limited or unavailable, the system automatically retries with the next model in the chain.
 
-| Role | Primary Model | Fallbacks |
-|---|---|---|
-| `slm_intent` (intent classification) | `llama-4-scout-17b-16e-instruct` | `llama-3.1-8b-instant`, `llama-4-maverick-17b` |
-| `llm_reasoning` (legal reasoning) | `moonshotai/kimi-k2-instruct-0905` | `kimi-k2-instruct`, `llama-3.3-70b-versatile` |
-| `summarisation` | `llama-3.1-8b-instant` | `llama-3.3-70b-versatile` |
-| `qa` (Stage 3 Q&A) | `llama-3.1-8b-instant` | `llama-3.3-70b-versatile` |
+> **Last benchmarked: August 11, 2026** on 8 live Groq models (4 SLM, 4 LLM).
+> Judge: `llama-3.3-70b-versatile`. Composite = (ROUGE-1 + BLEU + METEOR + Faithfulness + (1−Hallucination)) / 5.
+
+| Role | Primary Model | Fallback 1 | Fallback 2 |
+|---|---|---|---|
+| `slm_intent` (intent classification) | `groq/compound-mini` (0.671) | `openai/gpt-oss-20b` (0.628) | `allam-2-7b` (0.614) |
+| `llm_reasoning` (legal reasoning) | `openai/gpt-oss-120b` (0.548) | `qwen/qwen3.6-27b` (0.522) | `groq/compound` |
+| `summarisation` | `groq/compound-mini` | `openai/gpt-oss-20b` | `qwen/qwen3.6-27b` |
+| `qa` (Stage 3 Q&A) | `groq/compound-mini` | `openai/gpt-oss-20b` | `qwen/qwen3.6-27b` |
+
+> **Note:** `llama-3.1-8b-instant` and `llama-3.3-70b-versatile` were deprecated by Groq on August 16, 2026 and have been removed from all chains. `groq/compound` internally uses `openai/gpt-oss-120b` and shares its TPM budget — kept as last-resort only.
 
 You can override the model for any session by setting `GROQ_MODEL` in `.env`.
 
