@@ -1,0 +1,60 @@
+{
+  "timestamp_utc": "2026-10-12T14:30:26.618551+00:00",
+  "total_models_evaluated": 4,
+  "results": [
+    {
+      "model": "allam-2-7b",
+      "tier": "SLM",
+      "intent_accuracy": 0.5,
+      "reasoning_f1": 0.0,
+      "parse_rate": 0.5,
+      "avg_latency_sec": 0.66,
+      "composite_score": 0.275
+    },
+    {
+      "model": "openai/gpt-oss-120b",
+      "tier": "LLM",
+      "intent_accuracy": 1.0,
+      "reasoning_f1": 0.167,
+      "parse_rate": 0.75,
+      "avg_latency_sec": 2.31,
+      "composite_score": 0.6
+    },
+    {
+      "model": "openai/gpt-oss-20b",
+      "tier": "SLM",
+      "intent_accuracy": 1.0,
+      "reasoning_f1": 0.0,
+      "parse_rate": 0.5,
+      "avg_latency_sec": 1.01,
+      "composite_score": 0.5
+    },
+    {
+      "model": "qwen/qwen3.8-27b",
+      "tier": "LLM",
+      "intent_accuracy": 1.0,
+      "reasoning_f1": 0.444,
+      "parse_rate": 1.0,
+      "avg_latency_sec": 0.72,
+      "composite_score": 0.75
+    }
+  ],
+  "recommended_chains": {
+    "slm_intent": [
+      "openai/gpt-oss-20b",
+      "allam-2-7b"
+    ],
+    "llm_reasoning": [
+      "qwen/qwen3.8-27b",
+      "openai/gpt-oss-120b"
+    ],
+    "summarisation": [
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.8-27b"
+    ],
+    "qa": [
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.8-27b"
+    ]
+  }
+}
