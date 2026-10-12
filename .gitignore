@@ -87,3 +87,6 @@ AGENT_README_BENCHMARK.md
 *.pdf
 
 backend/benchmark/*
+
+#Personal notes
+notes/
