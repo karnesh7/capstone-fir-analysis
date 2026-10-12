@@ -34,24 +34,20 @@ from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
 
 
-# Updated August 2026 — reflects currently live Groq models after mass deprecation
+# Updated: reflects currently live Groq models
 DEFAULT_CANDIDATE_MODELS = [
-    "groq/compound-mini",
     "openai/gpt-oss-20b",
     "allam-2-7b",
-    "qwen/qwen3.6-27b",
+    "qwen/qwen3.8-27b",
     "openai/gpt-oss-120b",
-    "groq/compound",
 ]
 
 # Approximate list-price defaults (USD per 1M tokens) for comparative analysis.
 DEFAULT_PRICE_PER_1M = {
-    "groq/compound-mini":  {"input": 0.00, "output": 0.00},
-    "openai/gpt-oss-20b":  {"input": 0.11, "output": 0.33},
     "allam-2-7b":          {"input": 0.05, "output": 0.08},
-    "qwen/qwen3.6-27b":    {"input": 0.29, "output": 0.79},
+    "openai/gpt-oss-20b":  {"input": 0.11, "output": 0.33},
+    "qwen/qwen3.8-27b":    {"input": 0.29, "output": 0.79},
     "openai/gpt-oss-120b": {"input": 1.20, "output": 3.60},
-    "groq/compound":       {"input": 0.00, "output": 0.00},
 }
 
 

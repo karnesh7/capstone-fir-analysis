@@ -13,7 +13,7 @@
     "allam-2-7b",
     "openai/gpt-oss-20b"
   ],
-  "best_model": "groq/compound-mini",
+  "best_model": "openai/gpt-oss-20b",
   "ranking": [
     {
       "model": "groq/compound-mini",
