@@ -37,8 +37,8 @@ MODEL_FALLBACKS: dict[str, list[str]] = {
     ],
     # LLM — legal reasoning  (Stage 2)
     "llm_reasoning": [
-        "openai/gpt-oss-120b",   # composite=0.548, 120B reasoning model, 131k context
-        "qwen/qwen3.8-27b",      # 27B reasoning model, 131k context, tools/json
+        "qwen/qwen3.8-27b",      # composite=0.731, F1=0.603, 100% JSON valid, 0.44s latency
+        "openai/gpt-oss-120b",   # composite=0.610, 120B high-capacity fallback
     ],
     # Summarisation / Stage-2 helpers
     "summarisation": [

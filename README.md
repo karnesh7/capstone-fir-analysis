@@ -339,7 +339,7 @@ LexIR uses a **role-based model fallback chain** defined in `backend/api/model_c
 | Role | Primary Model | Fallback 1 | Fallback 2 |
 |---|---|---|---|
 | `slm_intent` (intent classification) | `openai/gpt-oss-20b` (0.628) | `allam-2-7b` (0.614) | — |
-| `llm_reasoning` (legal reasoning) | `openai/gpt-oss-120b` (0.548) | `qwen/qwen3.8-27b` | — |
+| `llm_reasoning` (legal reasoning) | `qwen/qwen3.8-27b` (0.731) | `openai/gpt-oss-120b` (0.610) | — |
 | `summarisation` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` | — |
 | `qa` (Stage 3 Q&A) | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` | — |
 
