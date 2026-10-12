@@ -93,7 +93,7 @@ Key files:
 |---|---|
 | API Framework | FastAPI + Uvicorn |
 | Real-time Comms | WebSockets |
-| LLM Provider | Groq (`openai/gpt-oss-120b`, `groq/compound-mini`, `qwen/qwen3.6-27b`) |
+| LLM Provider | Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`) |
 | Embeddings | `sentence-transformers` |
 | Vector Search | Pinecone |
 | Legal Database | Indian Kanoon API |
@@ -338,12 +338,12 @@ LexIR uses a **role-based model fallback chain** defined in `backend/api/model_c
 
 | Role | Primary Model | Fallback 1 | Fallback 2 |
 |---|---|---|---|
-| `slm_intent` (intent classification) | `groq/compound-mini` (0.671) | `openai/gpt-oss-20b` (0.628) | `allam-2-7b` (0.614) |
-| `llm_reasoning` (legal reasoning) | `openai/gpt-oss-120b` (0.548) | `qwen/qwen3.6-27b` (0.522) | `groq/compound` |
-| `summarisation` | `groq/compound-mini` | `openai/gpt-oss-20b` | `qwen/qwen3.6-27b` |
-| `qa` (Stage 3 Q&A) | `groq/compound-mini` | `openai/gpt-oss-20b` | `qwen/qwen3.6-27b` |
+| `slm_intent` (intent classification) | `openai/gpt-oss-20b` (0.628) | `allam-2-7b` (0.614) | — |
+| `llm_reasoning` (legal reasoning) | `openai/gpt-oss-120b` (0.548) | `qwen/qwen3.8-27b` | — |
+| `summarisation` | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` | — |
+| `qa` (Stage 3 Q&A) | `openai/gpt-oss-20b` | `qwen/qwen3.8-27b` | — |
 
-> **Note:** `llama-3.1-8b-instant` and `llama-3.3-70b-versatile` were deprecated by Groq on August 16, 2026 and have been removed from all chains. `groq/compound` internally uses `openai/gpt-oss-120b` and shares its TPM budget — kept as last-resort only.
+> **Note:** Deprecated/inactive models (`llama-3.1-8b-instant`, `llama-3.3-70b-versatile`, `groq/compound-mini`, `groq/compound`, and `qwen/qwen3.6-27b`) have been removed from all chains.
 
 You can override the model for any session by setting `GROQ_MODEL` in `.env`.
 
