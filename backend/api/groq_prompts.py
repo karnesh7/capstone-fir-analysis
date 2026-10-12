@@ -116,8 +116,9 @@ Scoring rules:
 The summary must always be concise and factual. Do not add markdown."""
 
         try:
-            resp = _get_groq().chat.completions.create(
-                model="llama-3.1-8b-instant",
+            raw_content = groq_chat_with_fallback(
+                _get_groq(),
+                role="summarisation",
                 messages=[
                     {"role": "system", "content": "You are a strict Indian legal relevance rater and concise summarizer. Return only valid JSON."},
                     {"role": "user", "content": prompt},
@@ -125,7 +126,7 @@ The summary must always be concise and factual. Do not add markdown."""
                 temperature=0.1,
                 max_tokens=280,
             )
-            parsed = _parse_llm_json(resp.choices[0].message.content)
+            parsed = _parse_llm_json(raw_content)
             score = parsed.get("relevance_score", 0)
             try:
                 score = int(score)
@@ -158,17 +159,16 @@ TEXT:
 SUMMARY:"""
 
     try:
-        # Use direct Llama-3.1-8B for speed and conciseness, as verified in benchmark
-        resp = _get_groq().chat.completions.create(
-            model="llama-3.1-8b-instant",
+        summary = groq_chat_with_fallback(
+            _get_groq(),
+            role="summarisation",
             messages=[
                 {"role": "system", "content": "Concise legal summarizer. 120 words max. No preamble."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.2,
-            max_tokens=250
+            max_tokens=250,
         )
-        summary = resp.choices[0].message.content.strip()
         return {"relevance_score": 100, "relevant": True, "summary": summary, "reason": ""} if return_metadata else summary
     except Exception as e:
         print(f"[Kanoon] Groq summarization error: {e}")

@@ -17,52 +17,38 @@ def _benchmark_file() -> Path:
 
 
 # ---------------------------------------------------------------------------
-#  Fallback model chains (ordered by August 2026 benchmark composite score)
+#  Fallback model chains (ordered by benchmark composite score)
 #  Each role maps to a list: [primary, fallback_1, fallback_2, ...]
 #
-#  Re-benchmarked: 2026-08-11 on 8 live models (4 SLM, 4 LLM).
-#  Judge: llama-3.3-70b-versatile (not under test → no TPM conflict).
-#  Composite = (ROUGE1 + BLEU + METEOR + Faithfulness + (1-Hallucination)) / 5
+#  Active Groq Models:
+#    - SLMs: openai/gpt-oss-20b, allam-2-7b
+#    - LLMs: openai/gpt-oss-120b, qwen/qwen3.8-27b
 #
-#  SLM ranking (non-deprecated):
-#    compound-mini 0.671 > gpt-oss-20b 0.628 > allam-2-7b 0.614
-#  LLM ranking (non-deprecated, all 5/5 cases):
-#    gpt-oss-120b 0.548 > qwen3.6-27b 0.522
-#    (groq/compound 0.628 but only 4/5 — uses gpt-oss-120b internally,
-#     same TPM bucket; kept as last-resort only)
-#
-#  Deprecated models removed (shutdown Aug 16 2026):
-#    llama-3.1-8b-instant (was best SLM at 0.739 — no longer available)
-#    llama-3.3-70b-versatile (was #2 LLM at 0.610 — no longer available)
+#  Deprecated / Inactive models removed:
+#    - llama-3.1-8b-instant & llama-3.3-70b-versatile (shut down)
+#    - groq/compound-mini & groq/compound (unavailable)
+#    - qwen/qwen3.6-27b (superseded by qwen/qwen3.8-27b)
 # ---------------------------------------------------------------------------
 MODEL_FALLBACKS: dict[str, list[str]] = {
     # SLM — intent recognition  (Stage 1)
-    # Benchmark Aug 11 2026: compound-mini > gpt-oss-20b > allam-2-7b
     "slm_intent": [
-        "groq/compound-mini",    # composite=0.671, R1=0.589, Faith=0.88, free-tier
-        "openai/gpt-oss-20b",    # composite=0.628, R1=0.571, Faith=0.94
-        "allam-2-7b",            # composite=0.614, R1=0.584, Faith=0.78, fastest
+        "openai/gpt-oss-20b",    # composite=0.628, 131k context, fast structured output
+        "allam-2-7b",            # composite=0.614, 4k context, fast fallback
     ],
     # LLM — legal reasoning  (Stage 2)
-    # Benchmark Aug 11 2026: gpt-oss-120b > qwen3.6-27b (both 5/5 complete)
-    # groq/compound uses gpt-oss-120b internally → same TPM; kept as last-resort
     "llm_reasoning": [
-        "openai/gpt-oss-120b",   # composite=0.548, R1=0.480, Faith=0.76  (5/5)
-        "qwen/qwen3.6-27b",      # composite=0.522, R1=0.415, Faith=0.88  (5/5)
-        "groq/compound",         # composite=0.628 (4/5 cases only) — last-resort
+        "openai/gpt-oss-120b",   # composite=0.548, 120B reasoning model, 131k context
+        "qwen/qwen3.8-27b",      # 27B reasoning model, 131k context, tools/json
     ],
     # Summarisation / Stage-2 helpers
-    # Prefer fast SLM; escalate to LLM if quality demands it
     "summarisation": [
-        "groq/compound-mini",    # best SLM, free-tier
-        "openai/gpt-oss-20b",    # reliable paid SLM fallback
-        "qwen/qwen3.6-27b",      # LLM quality fallback
+        "openai/gpt-oss-20b",    # reliable fast SLM
+        "qwen/qwen3.8-27b",      # LLM quality fallback
     ],
     # Q&A — PrecedentQA
     "qa": [
-        "groq/compound-mini",
         "openai/gpt-oss-20b",
-        "qwen/qwen3.6-27b",
+        "qwen/qwen3.8-27b",
     ],
 }
 

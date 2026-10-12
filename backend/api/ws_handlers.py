@@ -252,7 +252,7 @@ async def handle_start_analysis(
     stage1_data["_raw_analysis"] = analysis
     stage1_data["telemetry"] = {
         "latency_s": s1_latency,
-        "model": "Groq Llama-3.3-70b",
+        "model": "Groq GPT-OSS 120B / 20B",
         "vectors_scanned": 865,
         "similarity_metric": "Cosine",
         "retrieval_mode": "Hybrid RAG + Rule Filtering"
@@ -382,7 +382,7 @@ async def handle_full_analysis(
     stage1_data["_raw_analysis"] = analysis
     stage1_data["telemetry"] = {
         "latency_s": s1_latency,
-        "model": "Groq Llama-3.3-70b",
+        "model": "Groq GPT-OSS 120B / 20B",
         "vectors_scanned": 865,
         "similarity_metric": "Cosine",
         "retrieval_mode": "Hybrid RAG + Rule Filtering"
