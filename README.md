@@ -41,12 +41,12 @@
 
 | 1. Live Analysis Workspace & Telemetry | 2. IPC ↔ BNS Dual Mapping Modal |
 |:---:|:---:|
-| ![Dashboard](screenshots/1_Dashboard.png) | ![Applicable Sections](screenshots/5_ApplicableSections.png) |
+| ![Dashboard](screenshots/01-dashboard.png) | ![Applicable Sections](screenshots/05-applicable-sections.png) |
 | *Full workspace layout with session history and live telemetry* | *Interactive comparison modal showing statutory penalties & notes* |
 
 <p align="center">
   <b>3. Dispositive Verdict & Sentencing Prediction</b><br>
-  <img src="screenshots/6_VerdictPrediction.png" alt="Verdict Prediction" width="480" />
+  <img src="screenshots/06-verdict-prediction.png" alt="Verdict Prediction" width="480" />
   <br><i>Outcome probabilities, sentencing ranges, bail outlook, and statutory influence breakdown</i>
 </p>
 
@@ -55,12 +55,12 @@
 
 | Intent Recognition & Civil Guard | Retrieved Court Precedents |
 |:---:|:---:|
-| ![Intent Identification](screenshots/4_CaseSummary_IntentIdentify.png) | ![Court Judgments](screenshots/8_RelevantCourtJudgements.png) |
+| ![Intent Identification](screenshots/04-case-summary-intent.png) | ![Court Judgments](screenshots/08-court-precedents.png) |
 | *Civil dispute filtering bypassing criminal sections* | *Summarized High Court & Supreme Court judgments* |
 
 | Incident Input Form | Structured Incident Metadata |
 |:---:|:---:|
-| ![Incident Form](screenshots/2_Submitcase_a.png) | ![Case Facts](screenshots/3_SubmitCase_b.png) |
+| ![Incident Form](screenshots/02-submit-case-input.png) | ![Case Facts](screenshots/03-submit-case-scenario.png) |
 | *Narrative form with 1-click preset scenario pills* | *Structured incident details (weapons, stolen property)* |
 
 </details>
